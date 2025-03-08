@@ -62,16 +62,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'jira_board.wsgi.application'
 
+# DATABASE DETAILS
+DB_NAME: str = ''
+DB_USER: str = ''
+DB_PASSWORD: str = ''
+DB_HOST: str = ''
+DB_PORT: int = 0
 
-# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': '',
-        'USER': '',
-        'PASSWORD':'',
-        'HOST': '',
-        'PORT': 0
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT
     }
 }
 
@@ -100,7 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 

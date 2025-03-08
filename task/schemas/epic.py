@@ -5,6 +5,7 @@ from graphql import GraphQLError
 from task.schemas.task import TaskType
 from task import models
 
+
 class EpicType(DjangoObjectType):
     tasks = graphene.List(TaskType)
     task_count = graphene.Int()
@@ -20,12 +21,12 @@ class EpicType(DjangoObjectType):
             "is_completed"
         )
 
-
     def resolve_tasks(self, info):
         return models.Task.objects.filter(epic=self)
 
     def resolve_task_count(self, info):
         return models.Task.objects.filter(epic=self).count()
+
 
 class CreateEpic(graphene.Mutation):
     class Arguments:
@@ -109,7 +110,6 @@ class UpdateEpic(graphene.Mutation):
                 success=False,
                 message=f"An error occurred: {str(e)}"
             )
-
 
 
 class Query(graphene.ObjectType):
