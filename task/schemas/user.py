@@ -9,7 +9,7 @@ from task.schemas.epic import EpicType
 
 class JiraUserType(DjangoObjectType):
     epics = graphene.List(EpicType)
-    epicsCount = graphene.Int()
+    epic_count = graphene.Int()
 
     class Meta:
         model = models.JiraUser
@@ -26,10 +26,10 @@ class JiraUserType(DjangoObjectType):
         )
 
     def resolve_epics(self, info):
-        return models.Epic.objects.filter(epic=self)
+        return models.Epic.objects.filter(user=self)
 
-    def resolve_epics_counts(self, info):
-        return models.Epic.objects.filter(epic=self).count()
+    def resolve_epic_count(self, info):
+        return models.Epic.objects.filter(user=self).count()
 
 
 class CreateUser(graphene.Mutation):
