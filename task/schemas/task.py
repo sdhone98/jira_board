@@ -41,6 +41,14 @@ class CreateTask(graphene.Mutation):
             epic_instance = models.Epic.objects.get(id=epic)
             owner_instance = models.JiraUser.objects.get(id=owner)
             assignee_instance = models.JiraUser.objects.get(id=assignee)
+
+            if epic_instance.user.id != owner_instance.id:
+                return CreateTask(
+                    task=None,
+                    success=False,
+                    message=f"User dont have access of '{epic_instance.name}'.!"
+                )
+
             task = models.Task.objects.create(
                 name=name,
                 description=description,
