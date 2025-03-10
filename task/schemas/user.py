@@ -1,5 +1,6 @@
 import graphene
 from django.db import IntegrityError
+from django.db.models import Q
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
 from task import models
@@ -138,6 +139,59 @@ class UpdateUser(graphene.Mutation):
             )
 
 
+class DeleteUser(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    user = graphene.Field(JiraUserType)
+    success = graphene.Boolean(default_value=False)
+    message = graphene.String(default_value="")
+
+    def mutate(self, info, id):
+        try:
+            user = models.JiraUser.objects.get(pk=id)
+
+            # Check if the user is linked to any tasks or epics
+            has_tasks = models.Task.objects.filter(
+                Q(owner=user) | Q(assignee=user)
+            )
+
+            task_list = list(
+                has_tasks.values_list('name', flat=True)
+            )
+
+            if task_list:
+                return DeleteUser(
+                    success=False,
+                    message=f"User cannot be deleted because they have assigned tasks: {', '.join(task_list)}"
+                )
+
+            has_epics = models.Epic.objects.filter(user=user)
+
+            epic_list = list(
+                has_epics.values_list('name', flat=True)
+            )
+
+            if epic_list:
+                return DeleteUser(
+                    success=False,
+                    message=f"User cannot be deleted because they have created epics: {', '.join(epic_list)}"
+                )
+
+            # user.delete()
+            return DeleteUser(
+                user=user,
+                success=True,
+                message="User deleted successfully"
+            )
+        except models.JiraUser.DoesNotExist:
+            return DeleteUser(
+                user=None,
+                success=False,
+                message="User not found"
+            )
+
+
 class Query(graphene.ObjectType):
     all_users = graphene.List(JiraUserType)
     user = graphene.Field(JiraUserType, id=graphene.ID(required=True))
@@ -155,6 +209,7 @@ class Query(graphene.ObjectType):
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
     update_user = UpdateUser.Field()
+    delete_user = DeleteUser.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
